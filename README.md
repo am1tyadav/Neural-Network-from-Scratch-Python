@@ -37,8 +37,16 @@ When calling the `model.train()` method, you can use the following parameters (P
 
 ## Predictions, Evaluations and Plots
 
-You can use the `model.evaluate(X, Y)` method to evaluate your test set(s). This returns a `float` accuracy score. You can use the `model.predict(X)` method to get predictions on new data. This will return a numpy array with the predicted labels (0 or 1). There are three plotting methods you can use after training to plot cost, accuracy and learning rate called `method.plot_cost()`, `method.plot_acc()` and `method.plot_alpha()`
+You can use the `model.evaluate(X, Y)` method to evaluate your test set(s). This returns a `float` accuracy score. You can use the `model.predict(X)` method to get predictions on new data. This will return a numpy array with the predicted labels (0 or 1). There are three plotting methods you can use after training to plot cost, accuracy and learning rate called `model.plot_cost()`, `model.plot_acc()` and `model.plot_alpha()`
 
 ## Activation Functions
 
 Currently, all the hidden units will have *relu* activation function and the output layer has the *sigmoid* activation function
+
+## Training Loop
+
+The training loop does the following:
+
+* As a first step, it initializes all the parameters of all the layers
+* Then, the loop starts for the given number of iterations
+* Inside the loop, forward propagation is applied, then the cost is calculated, then the gradients are calculated and finally, the parameters are updated.
