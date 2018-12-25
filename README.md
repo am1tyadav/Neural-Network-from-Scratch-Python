@@ -23,14 +23,14 @@ Keep the following points in mind:
 
 When calling the `model.train()` method, you can use the following parameters (Parameters are listed in sequence):
 
-* 'X' = training examples
-* 'Y' = training labels
-* 'iterations' = default value is set to 10. This is the number of times the training loop will run for
-* 'alpha' = default value is set to 0.001. This is the learning rate
-* 'decay' = default value is set to True. This is a boolean which will check for whether or not learning rate decays as training progresses
-* 'decay_iter' = default value is 5. This is the number of iterations after which learning rate will be decayed
-* 'decay_rate' = default valye is 0.9. This is the rate with which the learning rate will be reduced i.e. if decay was `alpha`, after number of `decay_iter` iterations, the new value will be `alpha * decay_rate` 
-* 'stop_decay_counter' = default value is 100. This is the maximum number of changes that can happen to the learning rate while training
+* `X` = training examples
+* `Y` = training labels
+* `iterations` = default value is set to 10. This is the number of times the training loop will run for
+* `alpha` = default value is set to 0.001. This is the learning rate
+* `decay` = default value is set to True. This is a boolean which will check for whether or not learning rate decays as training progresses
+* `decay_iter` = default value is 5. This is the number of iterations after which learning rate will be decayed
+* `decay_rate` = default valye is 0.9. This is the rate with which the learning rate will be reduced i.e. if decay was `alpha`, after number of `decay_iter` iterations, the new value will be `alpha * decay_rate` 
+* `stop_decay_counter` = default value is 100. This is the maximum number of changes that can happen to the learning rate while training
 * `verbose` = default is set to True. If this is set to true, the model will display the value for Cost after each iteration
 * `lam` = default is set to 0. This is the l2 regularization parameter
 
