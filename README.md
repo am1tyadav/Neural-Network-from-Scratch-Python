@@ -1,6 +1,6 @@
 # Create and Train a Neural Network in Python
 
-A simple implementation of neural networks in python. Use the class `model` to instantiate a neural network. This instance can be trained using the `train` method. Currently, this model can be applied only on binary classification problems.
+A simple implementation of neural networks in python. Use the class `model` to instantiate a neural network. This instance can be trained using the `train` method. Currently, this model can be applied only on binary classification problems. This is a pretty simple implementation which is meant to be used for learning about neural networks and deep learning.
 
 ## Using the Model
 
