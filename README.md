@@ -16,6 +16,7 @@ m.train(X, Y, iterations = 50, alpha = 0.1, verbose = False)
 Keep the following points in mind:
 
 * In the `add_layers()` method, pass on a list of nodes you want for each layer, starting with the number of features as the first value. Each layer is a densely connected layer. The output node must be set to 1 currently (since only binary classification is implemented at the moment)
+* You can add as many hidden layers as you want. The list of layers should look something like this: `[NUMBER OF FEATURES, NODES OF LAYER 2, NODES OF LAYER 3...., NODES OF LAYER K, 1]`
 * The shape of examples must be (NUMBER OF FEATURES, NUMBER OF EXAMPLES)
 * The shape of labels must be (1, NUMBER OF EXAMPLES)
 
@@ -37,3 +38,7 @@ When calling the `model.train()` method, you can use the following parameters (P
 ## Predictions, Evaluations and Plots
 
 You can use the `model.evaluate(X, Y)` method to evaluate your test set(s). This returns a `float` accuracy score. You can use the `model.predict(X)` method to get predictions on new data. This will return a numpy array with the predicted labels (0 or 1). There are three plotting methods you can use after training to plot cost, accuracy and learning rate called `method.plot_cost()`, `method.plot_acc()` and `method.plot_alpha()`
+
+## Activation Functions
+
+Currently, all the hidden units will have *relu* activation function and the output layer has the *sigmoid* activation function
