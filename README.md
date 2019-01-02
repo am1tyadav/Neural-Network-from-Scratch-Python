@@ -1,6 +1,6 @@
 # Create and Train a Neural Network in Python
 
-A simple implementation to create and train a neural network in python. This is a pretty simple implementation which is meant to be used for learning about neural networks and deep learning.
+A simple implementation to create and train a neural network in python. At the moment, this is a fairly simple and straight-forward implementation which is meant to be used for learning about neural networks and deep learning.
 
 Use the class `model` to instantiate a neural network. This instance can be trained using the `train` method. Currently, this model can be applied only on binary classification problems. 
 
@@ -50,5 +50,24 @@ Currently, all the hidden units will have *relu* activation function and the out
 The training loop does the following:
 
 * As a first step, it initializes all the parameters of all the layers
-* Then, the loop starts for the given number of iterations
+* Then, the loop starts for the given number of iterations (full training set is used in each iteration)
 * Inside the loop, forward propagation is applied, then the cost is calculated, then the gradients are calculated and finally, the parameters are updated.
+
+## Example - Recognising Hand Written 0s and 1s from MNIST
+
+I wanted to apply the neural network model to the MNIST dataset, and perhaps I'll do that in the next iteration, but at the moment the model can only do binary classification, not multi-class classification. So, I decided to try and train the model on only the hand-written 0s and 1s from the MNIST dataset.
+
+The model architecture was `[784, 64, 64, 1]` and was trained for 60 iterations (batch gradient descent) with learning rate set to 0.003 and regularization parameter set to 4. The resulting accuracy on a test set was ~98.8%.
+
+## Next Steps
+
+Partial list of what else I will, hopefully, be implementing:
+
+* Algorithms
+  * RMSProp
+  * ADAM
+* Regularization
+  * Dropout
+  * Early Stopping
+* Activations
+  * Softmax
