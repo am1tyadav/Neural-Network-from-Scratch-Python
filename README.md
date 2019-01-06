@@ -58,16 +58,3 @@ The training loop does the following:
 I wanted to apply the neural network model to the MNIST dataset, and perhaps I'll do that in the next iteration, but at the moment the model can only do binary classification, not multi-class classification. So, I decided to try and train the model on only the hand-written 0s and 1s from the MNIST dataset.
 
 The model architecture was `[784, 64, 64, 1]` and was trained for 60 iterations (batch gradient descent) with learning rate set to 0.003 and regularization parameter set to 4. The resulting accuracy on a test set was ~98.8%.
-
-## Next Steps
-
-Partial list of what else I will, hopefully, be implementing:
-
-* Algorithms
-  * RMSProp
-  * ADAM
-* Regularization
-  * Dropout
-  * Early Stopping
-* Activations
-  * Softmax
