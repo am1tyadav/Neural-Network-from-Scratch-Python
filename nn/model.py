@@ -11,6 +11,16 @@ class IModel(ABC):
     """
     This protocol must be implemented by Model classes
     """
+    @property
+    @abstractmethod
+    def learning_rate(self):
+        ...
+
+    @learning_rate.setter
+    @abstractmethod
+    def learning_rate(self, value: float):
+        ...
+
     @abstractmethod
     def __call__(self, input_tensor: np.ndarray) -> np.ndarray:
         ...
@@ -36,17 +46,20 @@ class IModel(ABC):
         ...
 
 
-class MLP(IModel):
+class NeuralNetwork(IModel):
     """
     Todo - Optimizer needs to be separated from model implementation
     Instantiate with a list of of tuples. First item of each tuple must be a Layer
     and second item of each tuple must be an Activation applied to output of the layer
     """
-    def __init__(self, layers: [(ILayer, IActivation)], loss: ILoss, lr: float):
+    def __init__(self, layers: [(ILayer, IActivation)],
+                 loss: ILoss, learning_rate: float,
+                 regularization_factor: float = 0.):
         self._layers = layers
         self._num_layers = len(layers)
         self._loss = loss
-        self._lr = lr
+        self._learning_rate = learning_rate
+        self._regularization_factor = regularization_factor
         self._input = None
         self._output = None
         self._num_examples = None
@@ -63,11 +76,18 @@ class MLP(IModel):
 
         for layer, activation in self._layers:
             output = layer(output)
-            if activation is not None:
-                output = activation(output)
+            output = activation(output)
 
         self._output = output
         return self._output
+
+    @property
+    def learning_rate(self):
+        return self._learning_rate
+
+    @learning_rate.setter
+    def learning_rate(self, value: float):
+        self._learning_rate = value
 
     def backward_step(self, labels: np.ndarray):
         da = self._loss.gradient(self._output, labels)
@@ -83,6 +103,7 @@ class MLP(IModel):
 
             dz = np.multiply(da, activation.gradient(layer.output))
             layer.grad_weights = np.dot(dz, np.transpose(prev_layer_output)) / self._num_examples
+            layer.grad_weights = layer.grad_weights + (self._regularization_factor / self._num_examples) * layer.weights
             layer.grad_bias = np.mean(dz, axis=1, keepdims=True)
             da = np.dot(np.transpose(layer.grad_weights), dz)
 
@@ -112,4 +133,4 @@ class MLP(IModel):
 
     def update(self):
         for layer, _ in self._layers:
-            layer.update(self._lr)
+            layer.update(self._learning_rate)
