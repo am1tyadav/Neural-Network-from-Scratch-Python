@@ -1,9 +1,11 @@
-import numpy as np
 import unittest
-from nn.model import NeuralNetwork
-from nn.layer import Dense
+
+import numpy as np
+
 from nn.activation import ReLU, Sigmoid
+from nn.layer import Dense
 from nn.loss import BinaryCrossEntropy
+from nn.model import NeuralNetwork
 
 
 class ModelTest(unittest.TestCase):
@@ -11,7 +13,7 @@ class ModelTest(unittest.TestCase):
         layers = [
             (Dense(units=128), ReLU()),
             (Dense(units=128), ReLU()),
-            (Dense(units=10), Sigmoid())
+            (Dense(units=10), Sigmoid()),
         ]
         loss = BinaryCrossEntropy()
         self._NeuralNetwork = NeuralNetwork(layers=layers, loss=loss, learning_rate=0.1)
@@ -24,5 +26,5 @@ class ModelTest(unittest.TestCase):
         self.assertAlmostEqual(float(_output[0][0]), 0.5)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

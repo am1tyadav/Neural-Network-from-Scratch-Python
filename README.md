@@ -1,6 +1,19 @@
 # Create and Train a Neural Network in Python
 
-An implementation to create and train a simple neural network in python - just to learn the basics of how neural networks work
+An implementation to create and train a simple neural network in python - just to learn the basics of how neural networks work.
+
+Run the full example:
+
+```bash
+# Create virtual environment
+python -m venv venv
+# Activate virtual environment
+source venv/bin/activate
+# Install requirements
+pip install -r requirements.txt
+# Run the example
+python example.py
+```
 
 ## Usage
 
@@ -31,13 +44,12 @@ model = NeuralNetwork(
     learning_rate=1.
 )
 ```
+
 The model can then be trained:
 
 ```python
 model.fit(x_train, y_train)
 ```
-
-Please take a look at this [notebook](example.ipynb) for a detailed example
 
 ## Training Loop
 
@@ -46,7 +58,7 @@ The training loop is in the `fit` method in `NeuralNetwork`:
 ```python
 class NeuralNetwork(IModel):
     ...
-    
+
     def fit(self, examples, labels, epochs):
         self._input = examples
 
@@ -57,12 +69,13 @@ class NeuralNetwork(IModel):
             self.update() # [4]
     ...
 ```
-At the moment, one iteration is on the entire training set and mini-batch is not implemented. 
-In each iteration, we take a forward pass through the model `self(self._input)`. 
-Then loss is computed. Loss computation is only necessary if you plan to use the loss in some way - eg. log the loss. 
 
-The backward pass `self.backward_step(labels)` goes from the output layer, all the way 
-back to the inputs to compute gradients for all the learnable parameters. Once this is done, 
+At the moment, one iteration is on the entire training set and mini-batch is not implemented.
+In each iteration, we take a forward pass through the model `self(self._input)`.
+Then loss is computed. Loss computation is only necessary if you plan to use the loss in some way - eg. log the loss.
+
+The backward pass `self.backward_step(labels)` goes from the output layer, all the way
+back to the inputs to compute gradients for all the learnable parameters. Once this is done,
 we can update the learnable parameters with the `self.update()` method.
 
 ### 1. Forward Pass
@@ -82,12 +95,13 @@ class NeuralNetwork(IModel):
         self._output = output
     ...
 ```
-The tuple of layers in the `self._layers` parameter is actually a tuple of tuples where 
+
+The tuple of layers in the `self._layers` parameter is actually a tuple of tuples where
 each tuple has a layer (e.g. Dense), and an activation (e.g. ReLU).
 
 ### 2. Compute Loss
 
-A loss function is required when instantiating the model. The loss function must implement the `ILoss` protocol 
+A loss function is required when instantiating the model. The loss function must implement the `ILoss` protocol
 which returns computed loss when the loss function instance is called.
 
 ### 3. Backward Pass
@@ -117,13 +131,14 @@ class NeuralNetwork(IModel):
             da = np.dot(np.transpose(layer.grad_weights), dz)
     ...
 ```
-After calculating gradients from the loss function, we iterate over the layers 
-backwards all the way to the input to compute the gradients for all learnable parameters. 
-The computed gradients for each layer are stored in the layer instance itself - i.e 
+
+After calculating gradients from the loss function, we iterate over the layers
+backwards all the way to the input to compute the gradients for all learnable parameters.
+The computed gradients for each layer are stored in the layer instance itself - i.e
 `layer.grad_weights` and `layer.grad_bias`.
 
-When the loop reaches the first layer, there is no previous output to it. Therefore, we set 
-`prev_layer_output` to `self._input` - i.e. the input to the model, the examples 
+When the loop reaches the first layer, there is no previous output to it. Therefore, we set
+`prev_layer_output` to `self._input` - i.e. the input to the model, the examples
 
 ### 4. Update the Parameters
 

@@ -1,5 +1,7 @@
-import numpy as np
 import unittest
+
+import numpy as np
+
 import nn.layer
 
 
@@ -12,5 +14,5 @@ class LayerTest(unittest.TestCase):
         self.assertEqual(self._layer(np.random.randn(8, 5)).shape, (self._num_units, 5))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

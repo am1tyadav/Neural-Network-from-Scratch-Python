@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
+
 import numpy as np
 
 
-class ILayer(ABC):
+class Layer(ABC):
     @property
     @abstractmethod
     def output(self):
@@ -21,7 +22,7 @@ class ILayer(ABC):
         ...
 
 
-class Dense(ILayer):
+class Dense(Layer):
     def __init__(self, units: int):
         self._units = units
         self._input_units = None
@@ -61,11 +62,13 @@ class Dense(ILayer):
 
     def build(self, input_tensor: np.ndarray):
         self._input_units = input_tensor.shape[0]
-        self._weights = np.random.randn(self._units, self._input_units) * np.sqrt(2. / self._input_units)
+        self._weights = np.random.randn(self._units, self._input_units) * np.sqrt(
+            2.0 / self._input_units
+        )
         self._bias = np.zeros((self._units, 1))
 
     def __call__(self, input_tensor: np.ndarray) -> np.ndarray:
-        _input_shape = input_tensor.shape
+        # _input_shape = input_tensor.shape
 
         if self._weights is None:
             self.build(input_tensor)

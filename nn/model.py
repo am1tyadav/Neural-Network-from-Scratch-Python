@@ -1,16 +1,17 @@
-from typing import Tuple
 from abc import ABC, abstractmethod
+from typing import Tuple
+
 import numpy as np
-from nn.layer import ILayer
-from nn.activation import IActivation
-from nn.loss import ILoss
-from nn.callback import ICallback
+
+from nn.activation import Activation
+from nn.callback import Callback
+from nn.layer import Layer
+from nn.loss import Loss
 
 
-class IModel(ABC):
-    """
-    This protocol must be implemented by Model classes
-    """
+class Model(ABC):
+    """Abstract base model class"""
+
     @property
     @abstractmethod
     def learning_rate(self):
@@ -46,15 +47,20 @@ class IModel(ABC):
         ...
 
 
-class NeuralNetwork(IModel):
+class NeuralNetwork(Model):
     """
     Todo - Optimizer needs to be separated from model implementation
     Instantiate with a list of of tuples. First item of each tuple must be a Layer
     and second item of each tuple must be an Activation applied to output of the layer
     """
-    def __init__(self, layers: [(ILayer, IActivation)],
-                 loss: ILoss, learning_rate: float,
-                 regularization_factor: float = 0.):
+
+    def __init__(
+        self,
+        layers: Tuple[Tuple[Layer, Activation]],
+        loss: Loss,
+        learning_rate: float,
+        regularization_factor: float = 0.0,
+    ):
         self._layers = layers
         self._num_layers = len(layers)
         self._loss = loss
@@ -102,13 +108,24 @@ class NeuralNetwork(IModel):
                 prev_layer_output = prev_activation(prev_layer.output)
 
             dz = np.multiply(da, activation.gradient(layer.output))
-            layer.grad_weights = np.dot(dz, np.transpose(prev_layer_output)) / self._num_examples
-            layer.grad_weights = layer.grad_weights + (self._regularization_factor / self._num_examples) * layer.weights
+            layer.grad_weights = (
+                np.dot(dz, np.transpose(prev_layer_output)) / self._num_examples
+            )
+            layer.grad_weights = (
+                layer.grad_weights
+                + (self._regularization_factor / self._num_examples) * layer.weights
+            )
             layer.grad_bias = np.mean(dz, axis=1, keepdims=True)
             da = np.dot(np.transpose(layer.grad_weights), dz)
 
-    def fit(self, examples: np.ndarray, labels: np.ndarray,
-            epochs: int, verbose: bool = False, callbacks: Tuple[ICallback] = ()):
+    def fit(
+        self,
+        examples: np.ndarray,
+        labels: np.ndarray,
+        epochs: int,
+        verbose: bool = False,
+        callbacks: Tuple[Callback] = (),
+    ):
         for epoch in range(1, epochs + 1):
             self._input = examples
             _ = self(self._input)

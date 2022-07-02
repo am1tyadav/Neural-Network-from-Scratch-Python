@@ -4,3 +4,8 @@ data
 *.DS_Store*
 .idea
 *__pycache__*
+venv
+.trunk
+.isort.cfg
+.markdownlint.yaml
+.flake8

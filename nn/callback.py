@@ -1,14 +1,14 @@
-from abc import ABC, abstractmethod
 import os
+from abc import ABC, abstractmethod
 
 
-class ICallback(ABC):
+class Callback(ABC):
     @abstractmethod
     def on_epoch_end(self, epoch: int, loss: float):
         ...
 
 
-class CSVLogger(ICallback):
+class CSVLogger(Callback):
     def __init__(self, file_path: str, overwrite: bool = False):
         self._file_path = file_path
         if os.path.isfile(file_path) and not overwrite:

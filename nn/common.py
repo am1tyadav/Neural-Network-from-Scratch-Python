@@ -1,8 +1,8 @@
-from typing import Any
 from abc import ABC, abstractmethod
+from typing import Any
 
 
-class IDifferentiable(ABC):
+class Differentiable(ABC):
     @abstractmethod
     def gradient(self, *args, **kwargs) -> Any:
         ...
