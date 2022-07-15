@@ -56,7 +56,7 @@ model.fit(x_train, y_train)
 The training loop is in the `fit` method in `NeuralNetwork`:
 
 ```python
-class NeuralNetwork(IModel):
+class NeuralNetwork(Model):
     ...
 
     def fit(self, examples, labels, epochs):
@@ -83,7 +83,7 @@ we can update the learnable parameters with the `self.update()` method.
 Forward pass is executed when the model instance is called:
 
 ```python
-class NeuralNetwork(IModel):
+class NeuralNetwork(Model):
     ...
     def __call__(self, input_tensor):
         output = input_tensor
@@ -109,7 +109,7 @@ which returns computed loss when the loss function instance is called.
 Backward pass computes gradients for all learnable parameters of the model:
 
 ```python
-class NeuralNetwork(IModel):
+class NeuralNetwork(Model):
     ...
     def backward_step(self, labels: np.ndarray):
         da = self._loss.gradient(self._output, labels)
@@ -145,7 +145,7 @@ When the loop reaches the first layer, there is no previous output to it. Theref
 Finally, the learnable parameters (weights and biases) are updated:
 
 ```python
-class NeuralNetwork(IModel):
+class NeuralNetwork(Model):
     ...
     def update(self):
         for layer, _ in self._layers:
