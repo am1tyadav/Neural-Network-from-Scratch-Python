@@ -1,21 +1,9 @@
 from abc import ABC, abstractmethod
+
 import numpy as np
-from nn.optimizer import Optimizer
+
 
 class Layer(ABC):
-    """Abstract base class for neural network layers.
-
-    Attributes:
-        output (numpy.ndarray): The output tensor of the layer.
-
-    Methods:
-        __call__(input_tensor: numpy.ndarray) -> numpy.ndarray:
-            Applies the layer to the input tensor and returns the output.
-        build(input_tensor: numpy.ndarray):
-            Builds the layer and initializes its weights and biases.
-        update(optimizer: Optimizer):
-            Updates the layer's weights and biases using the specified optimizer.
-    """
     @property
     @abstractmethod
     def output(self):
@@ -30,7 +18,7 @@ class Layer(ABC):
         ...
 
     @abstractmethod
-    def update(self, optimizer: Optimizer):
+    def update(self, lr: float):
         ...
 
 
@@ -88,6 +76,6 @@ class Dense(Layer):
         self._output = np.dot(self._weights, input_tensor) + self._bias
         return self._output
 
-    def update(self, optimizer: Optimizer):
-        optimizer.update_weights(self, self.grad_weights)
-        optimizer.update_bias(self, self.grad_bias)
+    def update(self, lr: float):
+        self._weights = self._weights - lr * self._dw
+        self._bias = self._bias - lr * self._db

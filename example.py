@@ -6,7 +6,6 @@ from nn.activation import ReLU, Sigmoid
 from nn.layer import Dense
 from nn.loss import BinaryCrossEntropy
 from nn.model import NeuralNetwork
-from nn.optimizer import SGD
 
 
 def main():
@@ -23,7 +22,7 @@ def main():
             (Dense(1), Sigmoid()),
         ),
         loss=BinaryCrossEntropy(),
-        optimizer=SGD(learning_rate=1.0),
+        learning_rate=1.0,
         regularization_factor=2.0,
     )
 
