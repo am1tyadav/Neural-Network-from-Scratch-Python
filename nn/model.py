@@ -7,6 +7,20 @@ from nn.activation import Activation
 from nn.callback import Callback
 from nn.layer import Layer
 from nn.loss import Loss
+from nn.optimizer import Optimizer
+
+
+"""
+1. The Model class is an abstract base class that defines the common interface for all models in the package. It contains several abstract methods that all models must implement, such as __call__, fit, predict, evaluate, backward_step, and update.
+2. The NeuralNetwork class is a concrete implementation of the Model abstract base class. It represents a feedforward neural network that consists of a series of layers with associated activation functions.
+3. The __init__ method of NeuralNetwork takes a list of tuples, where each tuple represents a layer and its associated activation function. The first item in each tuple must be a Layer object, and the second item must be an Activation object.
+4. The __call__ method of NeuralNetwork implements the forward pass of the network. It takes an input tensor and passes it through each layer in the network, applying the associated activation function to the output of each layer.
+5. The backward_step method of NeuralNetwork implements the backward pass of the network. It takes the true labels for a batch of examples and computes the gradients of the loss with respect to the weights and biases of each layer in the network. It then uses these gradients to update the weights and biases of each layer using the optimizer.
+6. The fit method of NeuralNetwork trains the network on a given set of examples and labels. It takes the examples, labels, and the number of epochs to train for as input, and optionally takes a list of callbacks to be called after each epoch.
+7. The predict method of NeuralNetwork takes a set of examples as input and returns the predicted labels for those examples. It does this by applying the forward pass of the network to the examples and thresholding the output at 0.5.
+8. The evaluate method of NeuralNetwork takes a set of examples and their true labels as input, and returns the value of the loss function for those examples.
+9. The update method of NeuralNetwork updates the weights and biases of each layer in the network using the optimizer.
+"""
 
 
 class Model(ABC):
@@ -58,13 +72,13 @@ class NeuralNetwork(Model):
         self,
         layers: Tuple[Tuple[Layer, Activation]],
         loss: Loss,
-        learning_rate: float,
+        optimizer: Optimizer,
         regularization_factor: float = 0.0,
     ):
         self._layers = layers
         self._num_layers = len(layers)
         self._loss = loss
-        self._learning_rate = learning_rate
+        self._optimizer = optimizer
         self._regularization_factor = regularization_factor
         self._input = None
         self._output = None
@@ -95,6 +109,7 @@ class NeuralNetwork(Model):
     def learning_rate(self, value: float):
         self._learning_rate = value
 
+
     def backward_step(self, labels: np.ndarray):
         da = self._loss.gradient(self._output, labels)
 
@@ -116,7 +131,11 @@ class NeuralNetwork(Model):
                 + (self._regularization_factor / self._num_examples) * layer.weights
             )
             layer.grad_bias = np.mean(dz, axis=1, keepdims=True)
-            da = np.dot(np.transpose(layer.grad_weights), dz)
+            da = np.dot(np.transpose(layer.weights), dz)
+            
+            self._optimizer.update_weights(layer, layer.grad_weights)
+            self._optimizer.update_bias(layer, layer.grad_bias)
+
 
     def fit(
         self,
@@ -150,4 +169,4 @@ class NeuralNetwork(Model):
 
     def update(self):
         for layer, _ in self._layers:
-            layer.update(self._learning_rate)
+            layer.update(self._optimizer)
