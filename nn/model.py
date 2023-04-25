@@ -128,10 +128,10 @@ class NeuralNetwork(Model):
             )
             layer.grad_weights = (
                 layer.grad_weights
-                + (self._regularization_factor / self._num_examples) * layer.weights
+                + (self._regularization_factor / self._num_examples) * layer.get_weights()
             )
             layer.grad_bias = np.mean(dz, axis=1, keepdims=True)
-            da = np.dot(np.transpose(layer.weights), dz)
+            da = np.dot(np.transpose(layer.get_weights()), dz)
             
             self._optimizer.update_weights(layer, layer.grad_weights)
             self._optimizer.update_bias(layer, layer.grad_bias)

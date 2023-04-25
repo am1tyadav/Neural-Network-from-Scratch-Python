@@ -27,3 +27,38 @@ class BinaryCrossEntropy(Loss):
         return -1 * (
             np.divide(labels, predictions) - np.divide(1 - labels, 1 - predictions)
         )
+
+
+class MeanSquaredError(Loss):
+    def __call__(self, predictions: np.ndarray, labels: np.ndarray) -> np.ndarray:
+        return np.mean(np.square(predictions - labels))
+
+    def gradient(self, predictions: np.ndarray, labels: np.ndarray) -> np.ndarray:
+        return 2 * (predictions - labels) / labels.size
+
+
+class MeanAbsoluteError(Loss):
+    def __call__(self, predictions: np.ndarray, labels: np.ndarray) -> np.ndarray:
+        return np.mean(np.abs(predictions - labels))
+
+    def gradient(self, predictions: np.ndarray, labels: np.ndarray) -> np.ndarray:
+        return np.sign(predictions - labels) / labels.size
+
+
+class HuberLoss(Loss):
+    def __init__(self, delta: float = 1.0):
+        self.delta = delta
+
+    def __call__(self, predictions: np.ndarray, labels: np.ndarray) -> np.ndarray:
+        diff = np.abs(predictions - labels)
+        quadratic = np.minimum(diff, self.delta)
+        linear = diff - quadratic
+        return np.mean(0.5 * np.square(quadratic) + self.delta * linear)
+
+    def gradient(self, predictions: np.ndarray, labels: np.ndarray) -> np.ndarray:
+        diff = predictions - labels
+        is_small_error = np.abs(diff) <= self.delta
+        gradient = np.zeros_like(diff)
+        gradient[is_small_error] = diff[is_small_error]
+        gradient[~is_small_error] = self.delta * np.sign(diff[~is_small_error])
+        return gradient / labels.size

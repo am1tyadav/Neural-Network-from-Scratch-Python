@@ -34,7 +34,9 @@ class Optimizer:
         """
         if not isinstance(grad_weights, np.ndarray):
             raise TypeError("grad_weights should be a NumPy array")
-        layer.weights -= self.learning_rate * grad_weights
+        weights = layer.get_weights()
+        weights -= self.learning_rate * grad_weights
+        layer.set_weights(weights)
         
     def update_bias(self, layer, grad_bias):
         """Update the bias of the given layer using the gradient of bias.
@@ -48,7 +50,10 @@ class Optimizer:
         """
         if not isinstance(grad_bias, np.ndarray):
             raise TypeError("grad_bias should be a NumPy array")
-        layer.bias -= self.learning_rate * grad_bias
+        bias = layer.get_bias()
+        bias -= self.learning_rate * grad_bias
+        layer.set_bias(bias)
+
 
 class SGD(Optimizer):
 
@@ -73,7 +78,9 @@ class SGD(Optimizer):
         """
         if not isinstance(grad_weights, np.ndarray):
             raise TypeError("grad_weights should be a NumPy array")
-        layer.weights -= self.learning_rate * grad_weights
+        weights = layer.get_weights()
+        weights -= self.learning_rate * grad_weights
+        layer.set_weights(weights)
         
     def update_bias(self, layer, grad_bias):
         """Update the bias of the given layer using the gradient of bias.
@@ -87,21 +94,23 @@ class SGD(Optimizer):
         """
         if not isinstance(grad_bias, np.ndarray):
             raise TypeError("grad_bias should be a NumPy array")
-        layer.bias -= self.learning_rate * grad_bias
+        bias = layer.get_bias()
+        bias -= self.learning_rate * grad_bias
+        layer.set_bias(bias)
 
 
 class Adam(Optimizer):
+    """
+    Adam optimizer class for neural network optimization.
 
-    """Adam optimizer class for neural network optimization.
-    
-    Parameters:
-    learning_rate (float): The learning rate to be used for optimization.
-    beta_1 (float): The exponential decay rate for the first moment estimates.
-    beta_2 (float): The exponential decay rate for the second moment estimates.
-    epsilon (float): A small value added to the denominator to avoid dividing by zero.
+    Args:
+        learning_rate (float): The learning rate to be used for optimization.
+        beta_1 (float): The exponential decay rate for the first moment estimates.
+        beta_2 (float): The exponential decay rate for the second moment estimates.
+        epsilon (float): A small value used to prevent division by zero.
     """
 
-    def __init__(self, learning_rate: float = 0.001, beta_1: float = 0.9, beta_2: float = 0.999, epsilon: float = 1e-8):
+    def __init__(self, learning_rate: float, beta_1: float = 0.9, beta_2: float = 0.999, epsilon: float = 1e-8):
         super().__init__(learning_rate)
         self.beta_1 = beta_1
         self.beta_2 = beta_2
@@ -109,7 +118,7 @@ class Adam(Optimizer):
         self.m = None
         self.v = None
         self.t = 0
-        
+
     def update_weights(self, layer, grad_weights: np.ndarray):
         """
         Updates the weights of a layer using Adam optimizer.
@@ -122,6 +131,8 @@ class Adam(Optimizer):
             TypeError: If grad_weights is not a NumPy array.
 
         """
+        if not isinstance(grad_weights, np.ndarray):
+            raise TypeError("grad_weights should be a NumPy array")
         if self.m is None:
             self.m = np.zeros_like(grad_weights)
             self.v = np.zeros_like(grad_weights)
@@ -130,8 +141,10 @@ class Adam(Optimizer):
         self.v = self.beta_2 * self.v + (1 - self.beta_2) * (grad_weights ** 2)
         m_hat = self.m / (1 - self.beta_1 ** self.t)
         v_hat = self.v / (1 - self.beta_2 ** self.t)
-        layer.weights -= self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
-        
+        weights = layer.get_weights()
+        weights -= self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
+        layer.set_weights(weights)
+
     def update_bias(self, layer, grad_bias: np.ndarray):
         """
         Updates the bias of a layer using Adam optimizer.
@@ -144,6 +157,8 @@ class Adam(Optimizer):
             TypeError: If grad_bias is not a NumPy array.
 
         """
+        if not isinstance(grad_bias, np.ndarray):
+            raise TypeError("grad_bias should be a NumPy array")
         if self.m is None:
             self.m = np.zeros_like(grad_bias)
             self.v = np.zeros_like(grad_bias)
@@ -152,7 +167,9 @@ class Adam(Optimizer):
         self.v = self.beta_2 * self.v + (1 - self.beta_2) * (grad_bias ** 2)
         m_hat = self.m / (1 - self.beta_1 ** self.t)
         v_hat = self.v / (1 - self.beta_2 ** self.t)
-        layer.bias -= self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
+        bias = layer.get_bias()
+        bias = self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
+        layer.set_bias(bias)
 
 
 class RMSprop(Optimizer):
@@ -177,7 +194,10 @@ class RMSprop(Optimizer):
         if self.cache is None:
             self.cache = np.zeros_like(grad_weights)
         self.cache = self.decay_rate * self.cache + (1 - self.decay_rate) * (grad_weights ** 2)
-        layer.weights -= self.learning_rate * grad_weights / (np.sqrt(self.cache) + self.epsilon)
+        weights = layer.get_weights()
+        weights -= self.learning_rate * grad_weights / (np.sqrt(self.cache) + self.epsilon)
+        layer.set_weights(weights)
+        
         
     def update_bias(self, layer, grad_bias: np.ndarray):
         """
@@ -195,4 +215,6 @@ class RMSprop(Optimizer):
         if self.cache is None:
             self.cache = np.zeros_like(grad_bias)
         self.cache = self.decay_rate * self.cache + (1 - self.decay_rate) * (grad_bias ** 2)
-        layer.bias -= self.learning_rate * grad_bias / (np.sqrt(self.cache) + self.epsilon)
+        bias = layer.get_bias()
+        bias -= self.learning_rate * grad_bias / (np.sqrt(self.cache) + self.epsilon)
+        layer.set_bias(bias)

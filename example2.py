@@ -1,30 +1,30 @@
 import numpy as np
 from loguru import logger
 
-import mnist
-from nn.activation import ReLU, Sigmoid
+import boston
+from nn.activation import ReLU
 from nn.layer import Dense
-from nn.loss import BinaryCrossEntropy
+from nn.loss import MeanSquaredError
 from nn.model import NeuralNetwork
-from nn.optimizer import SGD, Adam, RMSprop
+from nn.optimizer import Adam
 
 
 def main():
-    logger.info("Fetching dataset")
+    logger.info("Creating dataset")
 
-    x_train, y_train, x_test, y_test = mnist.load("data")
+    x_train, y_train, x_test, y_test = boston.load("data")
 
     logger.info("Creating model")
 
     model = NeuralNetwork(
         layers=(
-            (Dense(128), ReLU()),
-            (Dense(128), ReLU()),
-            (Dense(1), Sigmoid()),
+            (Dense(13), ReLU()),
+            (Dense(18), ReLU()),
+            (Dense(1), None),
         ),
-        loss=BinaryCrossEntropy(),
-        optimizer=RMSprop(learning_rate=0.03),
-        regularization_factor=2.0,
+        loss=MeanSquaredError(),
+        optimizer=Adam(learning_rate=0.03),
+        regularization_factor=0.1,
     )
 
     logger.info("Training model")
