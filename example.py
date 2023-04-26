@@ -20,16 +20,17 @@ def main():
         layers=(
             (Dense(128), ReLU()),
             (Dense(128), ReLU()),
+            (Dense(128), ReLU()),
             (Dense(1), Sigmoid()),
         ),
         loss=BinaryCrossEntropy(),
-        optimizer=RMSprop(learning_rate=0.03),
+        optimizer=SGD(learning_rate=0.03),
         regularization_factor=2.0,
     )
 
     logger.info("Training model")
 
-    model.fit(x_train, y_train, epochs=20, verbose=True)
+    model.fit(x_train, y_train, epochs=40, verbose=True)
 
     logger.info("Evaluating trained model")
 

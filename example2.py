@@ -2,17 +2,22 @@ import numpy as np
 from loguru import logger
 
 import boston
+from boston import _normalize_data
 from nn.activation import ReLU
 from nn.layer import Dense
-from nn.loss import MeanSquaredError
+from nn.loss import MeanSquaredError, BinaryCrossEntropy, MeanAbsoluteError
 from nn.model import NeuralNetwork
-from nn.optimizer import Adam
+from nn.optimizer import Adam, SGD
 
 
 def main():
     logger.info("Creating dataset")
 
-    x_train, y_train, x_test, y_test = boston.load("data")
+    x_train, y_train, x_test, y_test = boston.load(preprocess_fn=_normalize_data)
+    print(y_train.shape)
+    print(x_train.shape)
+    print(y_test.shape)
+    print(x_test.shape)
 
     logger.info("Creating model")
 
@@ -20,9 +25,10 @@ def main():
         layers=(
             (Dense(13), ReLU()),
             (Dense(18), ReLU()),
-            (Dense(1), None),
+            (Dense(18), ReLU()),
+            (Dense(1), ReLU()),
         ),
-        loss=MeanSquaredError(),
+        loss=MeanAbsoluteError(),
         optimizer=Adam(learning_rate=0.03),
         regularization_factor=0.1,
     )

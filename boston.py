@@ -72,14 +72,17 @@ def _normalize_data(x: np.ndarray) -> np.ndarray:
     return x / np.max(x, axis=0)
 
 
-def _decode_and_preprocess_data(
-    data_path: str, target_path: str, preprocess_fn
-) -> Tuple[np.ndarray]:
-    data = _decode_data(data_path)
-    target = _decode_data(target_path)
+def _decode_and_preprocess_data(data_path: str) -> Tuple[np.ndarray]:
+    """Read data and labels, and return decoded numpy arrays"""
 
-    x = preprocess_fn(data)
-    y = target
+    logger.info(f"Decoding data at {data_path}")
+
+    data = _read_file(data_path)
+    labels = data[:, -1]
+    data = data[:, :-1]
+
+    x = _standardize_data(data)
+    y = labels
 
     return x, y
 
@@ -101,34 +104,35 @@ def train_test_split(x, y, test_size=0.3, random_state=None):
     x_test = x[test_indices]
     y_test = y[test_indices]
 
-    return x_train, x_test, y_train, y_test
+    return x_train, y_train, x_test, y_test
 
 
 async def _download_dataset(data_dir):
     """Download dataset to data_dir"""
 
-    urls = (
-        "https://archive.ics.uci.edu/ml/machine-learning-databases/housing/housing.data",
-        "https://archive.ics.uci.edu/ml/machine-learning-databases/housing/housing.names",
-    )
+    url = "https://archive.ics.uci.edu/ml/machine-learning-databases/housing/housing.data"
 
     os.makedirs(data_dir, exist_ok=True)
 
-    await asyncio.gather(*[_download_url_async(url, data_dir) for url in urls])
+    await asyncio.to_thread(_download_url, url, data_dir)
 
 
 def load(preprocess_fn=_standardize_data, test_size=0.3):
     """Load the Boston Housing dataset and return a train-test split"""
     
     data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
-    
+
     if not os.path.isdir(data_dir):
         asyncio.run(_download_dataset(data_dir))
 
     data_path = os.path.join(data_dir, "housing.data")
-    target_path = os.path.join(data_dir, "housing.names")
 
-    x, y = _decode_and_preprocess_data(data_path, target_path, preprocess_fn)
+    x = _decode_data(data_path)
+    y = x[:, -1] # The last column in the dataset is the target variable
 
-    return train_test_split(x, y, test_size=0.3, random_state=42) # Split the data into training and testing sets with a 30/70 split ratio.
+    x = x[:, :-1] # Remove the target variable from the input features
+
+    x = preprocess_fn(x)
+
+    return train_test_split(x, y, test_size=test_size, random_state=42) # Split the data into training and testing sets with a 30/70 split ratio.
 
