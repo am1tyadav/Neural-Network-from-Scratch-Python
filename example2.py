@@ -2,7 +2,7 @@ import numpy as np
 from loguru import logger
 
 import boston
-from boston import _normalize_data
+from boston import _normalize_data, _orignal_data
 from nn.activation import ReLU
 from nn.layer import Dense
 from nn.loss import MeanSquaredError, BinaryCrossEntropy, MeanAbsoluteError
@@ -13,7 +13,7 @@ from nn.optimizer import Adam, SGD
 def main():
     logger.info("Creating dataset")
 
-    x_train, y_train, x_test, y_test = boston.load(preprocess_fn=_normalize_data)
+    x_train, y_train, x_test, y_test = boston.load(preprocess_fn=_orignal_data)
     print(y_train.shape)
     print(x_train.shape)
     print(y_test.shape)
