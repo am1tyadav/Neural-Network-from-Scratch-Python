@@ -161,7 +161,7 @@ class NeuralNetwork(Model):
 
     def predict(self, examples: np.ndarray) -> np.ndarray:
         outputs = self(examples)
-        return (outputs > 0.5).astype("uint8")
+        return outputs
 
     def evaluate(self, examples: np.ndarray, labels: np.ndarray) -> np.ndarray:
         _ = self(examples)

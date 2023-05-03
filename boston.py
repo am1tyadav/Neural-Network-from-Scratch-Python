@@ -99,10 +99,10 @@ def train_test_split(x, y, test_size=0.3, random_state=None):
     test_indices = shuffled_indices[:test_size]
     train_indices = shuffled_indices[test_size:]
 
-    x_train = x[train_indices]
-    y_train = y[train_indices]
-    x_test = x[test_indices]
-    y_test = y[test_indices]
+    x_train = x[train_indices].T
+    y_train = y[train_indices].reshape(1,-1)
+    x_test = x[test_indices].T
+    y_test = y[test_indices].reshape(1,-1)
 
     return x_train, y_train, x_test, y_test
 

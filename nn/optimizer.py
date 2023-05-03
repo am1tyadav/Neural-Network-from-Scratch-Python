@@ -218,3 +218,5 @@ class RMSprop(Optimizer):
         bias = layer.get_bias()
         bias -= self.learning_rate * grad_bias / (np.sqrt(self.cache) + self.epsilon)
         layer.set_bias(bias)
+
+
