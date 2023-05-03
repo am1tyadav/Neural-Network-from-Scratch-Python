@@ -63,6 +63,9 @@ def _standardize_data(x: np.ndarray) -> np.ndarray:
 
     return (x - x_mean) / x_std
 
+def _orignal_data(x: np.array) -> np.ndarray:
+	"""Return the orignal data as it is"""
+	return x
 
 def _normalize_data(x: np.ndarray) -> np.ndarray:
     """Normalize data by dividing by max value"""
@@ -117,7 +120,7 @@ async def _download_dataset(data_dir):
     await asyncio.to_thread(_download_url, url, data_dir)
 
 
-def load(preprocess_fn=_standardize_data, test_size=0.3):
+def load(preprocess_fn=_orignal_data, test_size=0.3):
     """Load the Boston Housing dataset and return a train-test split"""
     
     data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
@@ -133,6 +136,7 @@ def load(preprocess_fn=_standardize_data, test_size=0.3):
     x = x[:, :-1] # Remove the target variable from the input features
 
     x = preprocess_fn(x)
+	y = preprocess_fn(y)
 
     return train_test_split(x, y, test_size=test_size, random_state=42) # Split the data into training and testing sets with a 30/70 split ratio.
 
