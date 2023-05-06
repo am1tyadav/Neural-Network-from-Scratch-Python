@@ -7,6 +7,15 @@ import numpy as np
 import requests
 from loguru import logger
 
+import numpy as np
+from loguru import logger
+
+from nn.activation import ReLU, Linear, Sigmoid
+from nn.layer import Dense
+from nn.loss import MeanSquaredError, BinaryCrossEntropy, MeanAbsoluteError
+from nn.model import NeuralNetwork
+from nn.optimizer import Adam, SGD, RMSprop
+
 
 def _download_url(url: str, data_dir: str) -> str:
     """Download file at url to data_dir"""
@@ -120,7 +129,7 @@ async def _download_dataset(data_dir):
     await asyncio.to_thread(_download_url, url, data_dir)
 
 
-def load(preprocess_fn=_orignal_data, test_size=0.3):
+def boston_load(preprocess_fn=_orignal_data, test_size=0.3):
     """Load the Boston Housing dataset and return a train-test split"""
     
     data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
@@ -136,7 +145,48 @@ def load(preprocess_fn=_orignal_data, test_size=0.3):
     x = x[:, :-1] # Remove the target variable from the input features
 
     x = preprocess_fn(x)
-	y = preprocess_fn(y)
+    y = preprocess_fn(y)
 
     return train_test_split(x, y, test_size=test_size, random_state=42) # Split the data into training and testing sets with a 30/70 split ratio.
 
+def main():
+    logger.info("Creating dataset")
+
+    x_train, y_train, x_test, y_test = boston_load(preprocess_fn=_normalize_data)
+
+    logger.info("Creating model")
+
+    model = NeuralNetwork(
+        layers=(
+            (Dense(13), ReLU()),
+            (Dense(128), ReLU()),
+            (Dense(64), ReLU()),
+            (Dense(1), Linear()),
+        ),
+        loss=MeanAbsoluteError(),
+        optimizer=SGD(learning_rate=1.),
+        regularization_factor=0.01,
+    )
+
+    logger.info("Training model")
+
+    model.fit(x_train, y_train, epochs=120, verbose=True)
+
+    logger.info("Evaluating trained model")
+
+    loss = model.evaluate(x_test, y_test)
+
+    logger.info(f"Validation loss: {np.squeeze(loss):.4f}")
+
+    preds = model.predict(x_test)
+
+    logger.info(f"First 5 predictions: {preds[:, :5]}")
+    logger.info(f"First 5 labels     : {y_test[:, :5]}")
+
+    acc = np.squeeze(np.mean(preds == y_test))
+
+    logger.info(f"Test set accuracy  : {acc:.4f}")
+
+
+if __name__ == "__main__":
+    main()
