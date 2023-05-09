@@ -44,18 +44,21 @@ class Dense(Layer):
         self._dw = None
         self._db = None
 
-    # Add getter and setter methods for weights and bias
-    def set_weights(self, weights):
+    @property
+    def weights(self):
+        return self._weights
+        
+    @weights.setter
+    def weights(self, weights: np.ndarray):
         self._weights = weights
 
-    def set_bias(self, bias):
-        self._bias = bias
-
-    def get_weights(self):
-        return self._weights
-
-    def get_bias(self):
+    @property
+    def bias(self):
         return self._bias
+
+    @bias.setter
+    def bias(self, bias: np.ndarray):
+        self._bias = bias
 
     @property
     def grad_weights(self):

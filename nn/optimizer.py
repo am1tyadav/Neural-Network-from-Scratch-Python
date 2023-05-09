@@ -34,9 +34,9 @@ class Optimizer:
         """
         if not isinstance(grad_weights, np.ndarray):
             raise TypeError("grad_weights should be a NumPy array")
-        weights = layer.get_weights()
+        weights = layer.weights
         weights -= self.learning_rate * grad_weights
-        layer.set_weights(weights)
+        layer.weights(weights)
         
     def update_bias(self, layer, grad_bias):
         """Update the bias of the given layer using the gradient of bias.
@@ -50,9 +50,9 @@ class Optimizer:
         """
         if not isinstance(grad_bias, np.ndarray):
             raise TypeError("grad_bias should be a NumPy array")
-        bias = layer.get_bias()
+        bias = layer.bias
         bias -= self.learning_rate * grad_bias
-        layer.set_bias(bias)
+        layer.bias(bias)
 
 
 class SGD(Optimizer):
@@ -78,9 +78,9 @@ class SGD(Optimizer):
         """
         if not isinstance(grad_weights, np.ndarray):
             raise TypeError("grad_weights should be a NumPy array")
-        weights = layer.get_weights()
+        weights = layer.weights
         weights -= self.learning_rate * grad_weights
-        layer.set_weights(weights)
+        layer.weights(weights)
         
     def update_bias(self, layer, grad_bias):
         """Update the bias of the given layer using the gradient of bias.
@@ -94,9 +94,9 @@ class SGD(Optimizer):
         """
         if not isinstance(grad_bias, np.ndarray):
             raise TypeError("grad_bias should be a NumPy array")
-        bias = layer.get_bias()
+        bias = layer.bias
         bias -= self.learning_rate * grad_bias
-        layer.set_bias(bias)
+        layer.bias(bias)
 
 
 class Adam(Optimizer):
@@ -141,9 +141,9 @@ class Adam(Optimizer):
         self.v = self.beta_2 * self.v + (1 - self.beta_2) * (grad_weights ** 2)
         m_hat = self.m / (1 - self.beta_1 ** self.t)
         v_hat = self.v / (1 - self.beta_2 ** self.t)
-        weights = layer.get_weights()
+        weights = layer.weights
         weights -= self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
-        layer.set_weights(weights)
+        layer.weights(weights)
 
     def update_bias(self, layer, grad_bias: np.ndarray):
         """
@@ -167,9 +167,9 @@ class Adam(Optimizer):
         self.v = self.beta_2 * self.v + (1 - self.beta_2) * (grad_bias ** 2)
         m_hat = self.m / (1 - self.beta_1 ** self.t)
         v_hat = self.v / (1 - self.beta_2 ** self.t)
-        bias = layer.get_bias()
+        bias = layer.bias
         bias = self.learning_rate * m_hat / (np.sqrt(v_hat) + self.epsilon)
-        layer.set_bias(bias)
+        layer.bias(bias)
 
 
 class RMSprop(Optimizer):
@@ -194,9 +194,9 @@ class RMSprop(Optimizer):
         if self.cache is None:
             self.cache = np.zeros_like(grad_weights)
         self.cache = self.decay_rate * self.cache + (1 - self.decay_rate) * (grad_weights ** 2)
-        weights = layer.get_weights()
+        weights = layer.weights
         weights -= self.learning_rate * grad_weights / (np.sqrt(self.cache) + self.epsilon)
-        layer.set_weights(weights)
+        layer.weights(weights)
         
         
     def update_bias(self, layer, grad_bias: np.ndarray):
@@ -215,8 +215,8 @@ class RMSprop(Optimizer):
         if self.cache is None:
             self.cache = np.zeros_like(grad_bias)
         self.cache = self.decay_rate * self.cache + (1 - self.decay_rate) * (grad_bias ** 2)
-        bias = layer.get_bias()
+        bias = layer.bias
         bias -= self.learning_rate * grad_bias / (np.sqrt(self.cache) + self.epsilon)
-        layer.set_bias(bias)
+        layer.bias(bias)
 
 
