@@ -1,0 +1,192 @@
+import asyncio
+import os
+import shutil
+from typing import Awaitable, Tuple
+
+import numpy as np
+import requests
+from loguru import logger
+
+import numpy as np
+from loguru import logger
+
+from nn.activation import ReLU, Linear, Sigmoid
+from nn.layer import Dense
+from nn.loss import MeanSquaredError, BinaryCrossEntropy, MeanAbsoluteError
+from nn.model import NeuralNetwork
+from nn.optimizer import Adam, SGD, RMSprop
+
+
+def _download_url(url: str, data_dir: str) -> str:
+    """Download file at url to data_dir"""
+
+    file_name = os.path.basename(url)
+    file_path = os.path.join(data_dir, file_name)
+
+    if os.path.isfile(file_path):
+        logger.warning(f"{file_path} already exists")
+    else:
+        logger.info(f"Downloading file from {url}")
+        res = requests.get(url=url, stream=True)
+
+        if res.status_code == 200:
+            logger.info("Got successful response, downloading..")
+
+            with open(file_path, "wb") as f:
+                f.write(res.content)
+
+            return file_path
+    return None
+
+
+async def _download_url_async(url: str, data_dir: str) -> Awaitable:
+    return await asyncio.to_thread(_download_url, url, data_dir)
+
+
+def _read_file(file_path: str) -> np.ndarray:
+    """Read a file and return its content as a numpy array"""
+
+    logger.info(f"Reading file at path {file_path}")
+
+    with open(file_path, "r") as f:
+        data = f.read()
+
+    return np.array([list(map(float, line.split())) for line in data.split("\n") if line.strip()])
+
+
+def _decode_data(data_path: str) -> np.ndarray:
+    """Read data and return decoded numpy array"""
+
+    logger.info(f"Decoding data at {data_path}")
+
+    return _read_file(data_path)
+
+
+def _standardize_data(x: np.ndarray) -> np.ndarray:
+    """Standardize data by subtracting mean and dividing by standard deviation"""
+
+    logger.info("Standardizing data")
+
+    x_mean = np.mean(x, axis=0)
+    x_std = np.std(x, axis=0)
+
+    return (x - x_mean) / x_std
+
+def _orignal_data(x: np.array) -> np.ndarray:
+	"""Return the orignal data as it is"""
+	return x
+
+def _normalize_data(x: np.ndarray) -> np.ndarray:
+    """Normalize data by dividing by max value"""
+
+    logger.info("Normalizing data")
+
+    return x / np.max(x, axis=0)
+
+
+def _decode_and_preprocess_data(data_path: str) -> Tuple[np.ndarray]:
+    """Read data and labels, and return decoded numpy arrays"""
+
+    logger.info(f"Decoding data at {data_path}")
+
+    data = _read_file(data_path)
+    labels = data[:, -1]
+    data = data[:, :-1]
+
+    x = _standardize_data(data)
+    y = labels
+
+    return x, y
+
+
+def train_test_split(x, y, test_size=0.3, random_state=None):
+    """Split the data into train and test sets"""
+
+    if random_state is not None:
+        np.random.seed(random_state)
+
+    n_samples = x.shape[0]
+    test_size = int(test_size * n_samples)
+    shuffled_indices = np.random.permutation(n_samples)
+    test_indices = shuffled_indices[:test_size]
+    train_indices = shuffled_indices[test_size:]
+
+    x_train = x[train_indices].T
+    y_train = y[train_indices].reshape(1,-1)
+    x_test = x[test_indices].T
+    y_test = y[test_indices].reshape(1,-1)
+
+    return x_train, y_train, x_test, y_test
+
+
+async def _download_dataset(data_dir):
+    """Download dataset to data_dir"""
+
+    url = "https://archive.ics.uci.edu/ml/machine-learning-databases/housing/housing.data"
+
+    os.makedirs(data_dir, exist_ok=True)
+
+    await asyncio.to_thread(_download_url, url, data_dir)
+
+
+def boston_load(preprocess_fn=_orignal_data, test_size=0.3):
+    """Load the Boston Housing dataset and return a train-test split"""
+    
+    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+
+    if not os.path.isdir(data_dir):
+        asyncio.run(_download_dataset(data_dir))
+
+    data_path = os.path.join(data_dir, "housing.data")
+
+    x = _decode_data(data_path)
+    y = x[:, -1] # The last column in the dataset is the target variable
+
+    x = x[:, :-1] # Remove the target variable from the input features
+
+    x = preprocess_fn(x)
+    y = preprocess_fn(y)
+
+    return train_test_split(x, y, test_size=test_size, random_state=42) # Split the data into training and testing sets with a 30/70 split ratio.
+
+def main():
+    logger.info("Creating dataset")
+
+    x_train, y_train, x_test, y_test = boston_load(preprocess_fn=_normalize_data)
+
+    logger.info("Creating model")
+
+    model = NeuralNetwork(
+        layers=(
+            (Dense(13), ReLU()),
+            (Dense(128), ReLU()),
+            (Dense(64), ReLU()),
+            (Dense(1), Linear()),
+        ),
+        loss=MeanAbsoluteError(),
+        optimizer=RMSprop(learning_rate=0.01),
+        regularization_factor=0.001,
+    )
+
+    logger.info("Training model")
+
+    model.fit(x_train, y_train, epochs=100, verbose=True)
+
+    logger.info("Evaluating trained model")
+
+    loss = model.evaluate(x_test, y_test)
+
+    logger.info(f"Validation loss: {np.squeeze(loss):.4f}")
+
+    preds = model.predict(x_test)
+
+    logger.info(f"First 5 predictions: {preds[:, :5]}")
+    logger.info(f"First 5 labels     : {y_test[:, :5]}")
+
+    acc = np.squeeze(np.sqrt(np.square(np.mean(preds - y_test))))
+
+    logger.info(f"Test set accuracy  : {acc:.4f}")
+
+
+if __name__ == "__main__":
+    main()

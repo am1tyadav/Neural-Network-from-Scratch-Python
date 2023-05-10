@@ -3,19 +3,6 @@ import numpy as np
 from nn.optimizer import Optimizer
 
 class Layer(ABC):
-    """Abstract base class for neural network layers.
-
-    Attributes:
-        output (numpy.ndarray): The output tensor of the layer.
-
-    Methods:
-        __call__(input_tensor: numpy.ndarray) -> numpy.ndarray:
-            Applies the layer to the input tensor and returns the output.
-        build(input_tensor: numpy.ndarray):
-            Builds the layer and initializes its weights and biases.
-        update(optimizer: Optimizer):
-            Updates the layer's weights and biases using the specified optimizer.
-    """
     @property
     @abstractmethod
     def output(self):
