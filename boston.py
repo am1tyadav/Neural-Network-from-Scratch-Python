@@ -131,23 +131,23 @@ async def _download_dataset(data_dir):
 
 def boston_load(preprocess_fn=_orignal_data, test_size=0.3):
     """Load the Boston Housing dataset and return a train-test split"""
-    
+
     data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
 
-    if not os.path.isdir(data_dir):
+    if not os.path.isdir(data_dir) or not os.path.isfile(os.path.join(data_dir, "housing.data")):
         asyncio.run(_download_dataset(data_dir))
 
     data_path = os.path.join(data_dir, "housing.data")
 
     x = _decode_data(data_path)
-    y = x[:, -1] # The last column in the dataset is the target variable
+    y = x[:, -1]  # The last column in the dataset is the target variable
 
-    x = x[:, :-1] # Remove the target variable from the input features
+    x = x[:, :-1]  # Remove the target variable from the input features
 
     x = preprocess_fn(x)
     y = preprocess_fn(y)
 
-    return train_test_split(x, y, test_size=test_size, random_state=42) # Split the data into training and testing sets with a 30/70 split ratio.
+    return train_test_split(x, y, test_size=test_size, random_state=42)  # Split the data into training and testing sets with a 30/70 split ratio.
 
 def r2_score(preds: np.ndarray, y_test: np.ndarray) -> float:
     mean_y = np.mean(y_test)
