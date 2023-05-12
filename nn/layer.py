@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
-
 import numpy as np
-
+from nn.optimizer import Optimizer
 
 class Layer(ABC):
     @property
@@ -18,7 +17,7 @@ class Layer(ABC):
         ...
 
     @abstractmethod
-    def update(self, lr: float):
+    def update(self, optimizer: Optimizer):
         ...
 
 
@@ -31,6 +30,22 @@ class Dense(Layer):
         self._output = None
         self._dw = None
         self._db = None
+
+    @property
+    def weights(self):
+        return self._weights
+        
+    @weights.setter
+    def weights(self, weights: np.ndarray):
+        self._weights = weights
+
+    @property
+    def bias(self):
+        return self._bias
+
+    @bias.setter
+    def bias(self, bias: np.ndarray):
+        self._bias = bias
 
     @property
     def grad_weights(self):
@@ -47,14 +62,6 @@ class Dense(Layer):
     @grad_bias.setter
     def grad_bias(self, gradients: np.ndarray):
         self._db = gradients
-
-    @property
-    def weights(self):
-        return self._weights
-
-    @property
-    def bias(self):
-        return self._bias
 
     @property
     def output(self):
@@ -76,6 +83,6 @@ class Dense(Layer):
         self._output = np.dot(self._weights, input_tensor) + self._bias
         return self._output
 
-    def update(self, lr: float):
-        self._weights = self._weights - lr * self._dw
-        self._bias = self._bias - lr * self._db
+    def update(self, optimizer: Optimizer):
+        optimizer.update_weights(self, self.grad_weights)
+        optimizer.update_bias(self, self.grad_bias)

@@ -1,3 +1,12 @@
+import numpy as np
+from loguru import logger
+
+from nn.activation import ReLU, Sigmoid
+from nn.layer import Dense
+from nn.loss import BinaryCrossEntropy
+from nn.model import NeuralNetwork
+from nn.optimizer import SGD, Adam, RMSprop
+
 """Download and unzip MNIST dataset from http://yann.lecun.com/exdb/mnist"""
 
 import asyncio
@@ -151,6 +160,49 @@ def _download(data_dir: str):
     asyncio.run(_download_dataset(data_dir))
 
 
-def load(data_dir: str) -> Tuple[np.ndarray]:
+def mnist_load(data_dir: str) -> Tuple[np.ndarray]:
     _download(data_dir)
     return _create_dataset(data_dir)
+
+
+def main():
+    logger.info("Fetching dataset")
+
+    x_train, y_train, x_test, y_test = mnist_load("data")
+
+    logger.info("Creating model")
+
+    model = NeuralNetwork(
+        layers=(
+            (Dense(64), ReLU()),
+            (Dense(64), ReLU()),
+            (Dense(1), Sigmoid()),
+        ),
+        loss=BinaryCrossEntropy(),
+        optimizer=Adam(learning_rate=0.01),
+        regularization_factor=2.0,
+    )
+
+    logger.info("Training model")
+
+    model.fit(x_train, y_train, epochs=20, verbose=True)
+
+    logger.info("Evaluating trained model")
+
+    loss = model.evaluate(x_test, y_test)
+
+    logger.info(f"Validation loss: {np.squeeze(loss):.4f}")
+
+    preds = model.predict(x_test)
+    preds = (preds >= 0.5).astype(int)
+
+    logger.info(f"First 5 predictions: {preds[:, :5]}")
+    logger.info(f"First 5 labels     : {y_test[:, :5]}")
+
+    acc = np.squeeze(np.mean(preds == y_test))
+
+    logger.info(f"Test set accuracy  : {acc:.4f}")
+
+
+if __name__ == "__main__":
+    main()

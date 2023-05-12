@@ -12,10 +12,13 @@ source venv/bin/activate
 # Install requirements
 pip install -r requirements.txt
 # Run the example
-python example.py
+python mnist.py
+python boston.py
 ```
 
 ## Usage
+
+## MNIST Dataset Example
 
 Create a tuple of layers where each element is a tuple as well
 
@@ -39,16 +42,16 @@ from nn.loss import BinaryCrossEntropy
 from nn.model import NeuralNetwork
 
 model = NeuralNetwork(
-    layers=layers,
     loss=BinaryCrossEntropy(),
-    learning_rate=1.
+    optimizer=Adam(learning_rate=0.01),
+    regularization_factor=2.0,
 )
 ```
 
 The model can then be trained:
 
 ```python
-model.fit(x_train, y_train)
+model.fit(x_train, y_train, epochs=20, verbose=True)
 ```
 
 ## Training Loop
@@ -86,6 +89,9 @@ Forward pass is executed when the model instance is called:
 class NeuralNetwork(Model):
     ...
     def __call__(self, input_tensor):
+        if self._num_examples is None:
+            self._num_examples = input_tensor.shape[-1]
+
         output = input_tensor
 
         for layer, activation in self._layers:
@@ -93,6 +99,7 @@ class NeuralNetwork(Model):
             output = activation(output)
 
         self._output = output
+        return self._output
     ...
 ```
 
@@ -129,6 +136,10 @@ class NeuralNetwork(Model):
                 (self._regularization_factor / self._num_examples) * layer.weights
             layer.grad_bias = np.mean(dz, axis=1, keepdims=True)
             da = np.dot(np.transpose(layer.grad_weights), dz)
+
+            self._optimizer.layer_number = index
+            self._optimizer.update_weights(layer, layer.grad_weights)
+            self._optimizer.update_bias(layer, layer.grad_bias)
     ...
 ```
 
@@ -140,22 +151,32 @@ The computed gradients for each layer are stored in the layer instance itself - 
 When the loop reaches the first layer, there is no previous output to it. Therefore, we set
 `prev_layer_output` to `self._input` - i.e. the input to the model, the examples
 
+`self._optimizer.layer_number = index`: This line sets the `layer_number` attribute of the optimizer to the current index. The `layer_number` attribute is used by the optimizer to keep track of the current layer being updated during the backward step.
+
+`self._optimizer.update_weights(layer, layer.grad_weights)`: This line calls the `update_weights` method of the optimizer and passes the current layer and its corresponding gradient of weights (`layer.grad_weights`) as arguments. The optimizer uses this information to update the weights of the layer based on its specific optimization algorithm (e.g., Adam, RMSprop).
+
+`self._optimizer.update_bias(layer, layer.grad_bias)`: This line calls the `update_bias` method of the optimizer and passes the current layer and its corresponding gradient of biases (`layer.grad_bias`) as arguments. The optimizer uses this information to update the biases of the layer based on its specific optimization algorithm.
+
 ### 4. Update the Parameters
 
-Finally, the learnable parameters (weights and biases) are updated:
+Finally, the learnable parameters (weights and biases) are updated based on its specific optimization algorithm (e.g., Adam, RMSprop):
 
 ```python
 class NeuralNetwork(Model):
     ...
-    def update(self):
-        for layer, _ in self._layers:
-            layer.update(self._learning_rate)
+    for ln in range(0, len(self._layers)):
+            self._optimizer.layer_number = ln
+            self._layers[ln][0].update(self._optimizer)
     ...
+```
+
+Similarly run the boston.py using
+```bash
+python boston.py
 ```
 
 ## Next Steps
 
-1. Separate the optimization logic from the layer and model classes
 2. Learning rate scheduler callback
 3. Way to implement non trainable layers like Dropout
 4. Way to save and load model parameters

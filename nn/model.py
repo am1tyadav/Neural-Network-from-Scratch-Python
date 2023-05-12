@@ -7,6 +7,7 @@ from nn.activation import Activation
 from nn.callback import Callback
 from nn.layer import Layer
 from nn.loss import Loss
+from nn.optimizer import Optimizer
 
 
 class Model(ABC):
@@ -48,33 +49,23 @@ class Model(ABC):
 
 
 class NeuralNetwork(Model):
-    """
-    Todo - Optimizer needs to be separated from model implementation
-    Instantiate with a list of of tuples. First item of each tuple must be a Layer
-    and second item of each tuple must be an Activation applied to output of the layer
-    """
-
     def __init__(
         self,
         layers: Tuple[Tuple[Layer, Activation]],
         loss: Loss,
-        learning_rate: float,
+        optimizer: Optimizer,
         regularization_factor: float = 0.0,
     ):
         self._layers = layers
         self._num_layers = len(layers)
         self._loss = loss
-        self._learning_rate = learning_rate
+        self._optimizer = optimizer
         self._regularization_factor = regularization_factor
         self._input = None
         self._output = None
         self._num_examples = None
 
     def __call__(self, input_tensor: np.ndarray) -> np.ndarray:
-        """
-        :param input_tensor: (num_features, num_examples)
-        :return: (num_units_of_final_layer, num_examples)
-        """
         if self._num_examples is None:
             self._num_examples = input_tensor.shape[-1]
 
@@ -94,6 +85,7 @@ class NeuralNetwork(Model):
     @learning_rate.setter
     def learning_rate(self, value: float):
         self._learning_rate = value
+
 
     def backward_step(self, labels: np.ndarray):
         da = self._loss.gradient(self._output, labels)
@@ -116,7 +108,12 @@ class NeuralNetwork(Model):
                 + (self._regularization_factor / self._num_examples) * layer.weights
             )
             layer.grad_bias = np.mean(dz, axis=1, keepdims=True)
-            da = np.dot(np.transpose(layer.grad_weights), dz)
+            da = np.dot(np.transpose(layer.weights), dz)
+            
+            self._optimizer.layer_number = index
+            self._optimizer.update_weights(layer, layer.grad_weights)
+            self._optimizer.update_bias(layer, layer.grad_bias)
+
 
     def fit(
         self,
@@ -142,12 +139,13 @@ class NeuralNetwork(Model):
 
     def predict(self, examples: np.ndarray) -> np.ndarray:
         outputs = self(examples)
-        return (outputs > 0.5).astype("uint8")
+        return outputs
 
     def evaluate(self, examples: np.ndarray, labels: np.ndarray) -> np.ndarray:
         _ = self(examples)
         return self._loss(self._output, labels)
 
     def update(self):
-        for layer, _ in self._layers:
-            layer.update(self._learning_rate)
+        for ln in range(0, len(self._layers)):
+            self._optimizer.layer_number = ln
+            self._layers[ln][0].update(self._optimizer)

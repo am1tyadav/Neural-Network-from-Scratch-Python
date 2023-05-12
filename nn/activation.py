@@ -1,14 +1,9 @@
 from abc import abstractmethod
-
 import numpy as np
-
 from nn.common import Differentiable
 
 
 class Activation(Differentiable):
-    """
-    Protocol that must be implemented by Activation classes
-    """
 
     @abstractmethod
     def __call__(self, input_tensor: np.ndarray) -> np.ndarray:
@@ -21,8 +16,8 @@ class ReLU(Activation):
 
     def gradient(self, input_tensor: np.ndarray) -> np.ndarray:
         _result = input_tensor.copy()
-        _result[input_tensor >= 0] = 1
-        _result[input_tensor < 0] = 0
+        _result[input_tensor > 0] = 1
+        _result[input_tensor <= 0] = 0
         return _result
 
 
