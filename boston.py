@@ -72,7 +72,7 @@ def _standardize_data(x: np.ndarray) -> np.ndarray:
 
     return (x - x_mean) / x_std
 
-def _orignal_data(x: np.array) -> np.ndarray:
+def _orignal_data(x: np.ndarray) -> np.ndarray:
 	"""Return the orignal data as it is"""
 	return x
 
@@ -149,6 +149,13 @@ def boston_load(preprocess_fn=_orignal_data, test_size=0.3):
 
     return train_test_split(x, y, test_size=test_size, random_state=42) # Split the data into training and testing sets with a 30/70 split ratio.
 
+def r2_score(preds: np.ndarray, y_test: np.ndarray) -> float:
+    mean_y = np.mean(y_test)
+    ss_total = np.sum((y_test - mean_y) ** 2)
+    ss_residual = np.sum((y_test - preds) ** 2)
+    r2 = 1 - (ss_residual / ss_total)
+    return r2
+
 def main():
     logger.info("Creating dataset")
 
@@ -183,7 +190,7 @@ def main():
     logger.info(f"First 5 predictions: {preds[:, :5]}")
     logger.info(f"First 5 labels     : {y_test[:, :5]}")
 
-    acc = np.squeeze(np.sqrt(np.square(np.mean(preds - y_test))))
+    acc = r2_score(preds, y_test)
 
     logger.info(f"Test set accuracy  : {acc:.4f}")
 

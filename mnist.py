@@ -174,12 +174,12 @@ def main():
 
     model = NeuralNetwork(
         layers=(
-            (Dense(128), ReLU()),
-            (Dense(128), ReLU()),
+            (Dense(64), ReLU()),
+            (Dense(64), ReLU()),
             (Dense(1), Sigmoid()),
         ),
         loss=BinaryCrossEntropy(),
-        optimizer=Adam(learning_rate=0.3),
+        optimizer=Adam(learning_rate=0.01),
         regularization_factor=2.0,
     )
 
