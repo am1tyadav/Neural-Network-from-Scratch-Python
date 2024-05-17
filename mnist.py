@@ -7,7 +7,7 @@ from nn.loss import BinaryCrossEntropy
 from nn.model import NeuralNetwork
 from nn.optimizer import SGD, Adam, RMSprop
 
-"""Download and unzip MNIST dataset from http://yann.lecun.com/exdb/mnist"""
+"""Download and unzip MNIST dataset"""
 
 import asyncio
 import gzip
@@ -124,12 +124,14 @@ def _decode_and_slice_data(
 async def _download_dataset(data_dir):
     """Download dataset to data_dir"""
 
-    urls = (
-        "http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz",
-        "http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz",
-        "http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz",
-        "http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz",
+    base_url = "https://raw.githubusercontent.com/fgnt/mnist/master"
+    files = (
+        "train-images-idx3-ubyte.gz",
+        "train-labels-idx1-ubyte.gz",
+        "t10k-images-idx3-ubyte.gz",
+        "t10k-labels-idx1-ubyte.gz"
     )
+    urls = [os.path.join(base_url, file) for file in files]
 
     os.makedirs(data_dir, exist_ok=True)
 

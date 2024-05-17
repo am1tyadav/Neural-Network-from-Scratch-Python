@@ -2,4 +2,4 @@ notebook==6.4.12
 numpy==1.23.0
 loguru==0.6.0
 requests==2.31.0
-tqdm==4.64.0
+tqdm>=4.66.3

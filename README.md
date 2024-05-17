@@ -5,7 +5,7 @@ An implementation to create and train a simple neural network in python - just t
 Run the full example:
 
 ```bash
-# Create virtual environment
+# Create virtual environment (Tested with Python 3.10)
 python -m venv venv
 # Activate virtual environment
 source venv/bin/activate
