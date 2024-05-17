@@ -16,7 +16,9 @@ class ModelTest(unittest.TestCase):
         ]
         loss = BinaryCrossEntropy()
         optimizer = SGD(learning_rate=0.01)
-        self._NeuralNetwork = NeuralNetwork(layers=layers, loss=loss, optimizer=optimizer)
+        self._NeuralNetwork = NeuralNetwork(
+            layers=layers, loss=loss, optimizer=optimizer
+        )
 
     def test_NeuralNetwork(self):
         _input = np.zeros((784, 16))

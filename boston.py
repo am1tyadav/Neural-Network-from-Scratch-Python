@@ -51,7 +51,9 @@ def _read_file(file_path: str) -> np.ndarray:
     with open(file_path, "r") as f:
         data = f.read()
 
-    return np.array([list(map(float, line.split())) for line in data.split("\n") if line.strip()])
+    return np.array(
+        [list(map(float, line.split())) for line in data.split("\n") if line.strip()]
+    )
 
 
 def _decode_data(data_path: str) -> np.ndarray:
@@ -72,9 +74,11 @@ def _standardize_data(x: np.ndarray) -> np.ndarray:
 
     return (x - x_mean) / x_std
 
+
 def _orignal_data(x: np.ndarray) -> np.ndarray:
-	"""Return the orignal data as it is"""
-	return x
+    """Return the orignal data as it is"""
+    return x
+
 
 def _normalize_data(x: np.ndarray) -> np.ndarray:
     """Normalize data by dividing by max value"""
@@ -112,9 +116,9 @@ def train_test_split(x, y, test_size=0.3, random_state=None):
     train_indices = shuffled_indices[test_size:]
 
     x_train = x[train_indices].T
-    y_train = y[train_indices].reshape(1,-1)
+    y_train = y[train_indices].reshape(1, -1)
     x_test = x[test_indices].T
-    y_test = y[test_indices].reshape(1,-1)
+    y_test = y[test_indices].reshape(1, -1)
 
     return x_train, y_train, x_test, y_test
 
@@ -122,7 +126,9 @@ def train_test_split(x, y, test_size=0.3, random_state=None):
 async def _download_dataset(data_dir):
     """Download dataset to data_dir"""
 
-    url = "https://archive.ics.uci.edu/ml/machine-learning-databases/housing/housing.data"
+    url = (
+        "https://archive.ics.uci.edu/ml/machine-learning-databases/housing/housing.data"
+    )
 
     os.makedirs(data_dir, exist_ok=True)
 
@@ -132,9 +138,11 @@ async def _download_dataset(data_dir):
 def boston_load(preprocess_fn=_orignal_data, test_size=0.3):
     """Load the Boston Housing dataset and return a train-test split"""
 
-    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data')
+    data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 
-    if not os.path.isdir(data_dir) or not os.path.isfile(os.path.join(data_dir, "housing.data")):
+    if not os.path.isdir(data_dir) or not os.path.isfile(
+        os.path.join(data_dir, "housing.data")
+    ):
         asyncio.run(_download_dataset(data_dir))
 
     data_path = os.path.join(data_dir, "housing.data")
@@ -147,7 +155,10 @@ def boston_load(preprocess_fn=_orignal_data, test_size=0.3):
     x = preprocess_fn(x)
     y = preprocess_fn(y)
 
-    return train_test_split(x, y, test_size=test_size, random_state=42)  # Split the data into training and testing sets with a 30/70 split ratio.
+    return train_test_split(
+        x, y, test_size=test_size, random_state=42
+    )  # Split the data into training and testing sets with a 30/70 split ratio.
+
 
 def r2_score(preds: np.ndarray, y_test: np.ndarray) -> float:
     mean_y = np.mean(y_test)
@@ -155,6 +166,7 @@ def r2_score(preds: np.ndarray, y_test: np.ndarray) -> float:
     ss_residual = np.sum((y_test - preds) ** 2)
     r2 = 1 - (ss_residual / ss_total)
     return r2
+
 
 def main():
     logger.info("Creating dataset")

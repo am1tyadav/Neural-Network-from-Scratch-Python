@@ -2,23 +2,20 @@ from abc import ABC, abstractmethod
 import numpy as np
 from nn.optimizer import Optimizer
 
+
 class Layer(ABC):
     @property
     @abstractmethod
-    def output(self):
-        ...
+    def output(self): ...
 
     @abstractmethod
-    def __call__(self, input_tensor: np.ndarray) -> np.ndarray:
-        ...
+    def __call__(self, input_tensor: np.ndarray) -> np.ndarray: ...
 
     @abstractmethod
-    def build(self, input_tensor: np.ndarray):
-        ...
+    def build(self, input_tensor: np.ndarray): ...
 
     @abstractmethod
-    def update(self, optimizer: Optimizer):
-        ...
+    def update(self, optimizer: Optimizer): ...
 
 
 class Dense(Layer):
@@ -34,7 +31,7 @@ class Dense(Layer):
     @property
     def weights(self):
         return self._weights
-        
+
     @weights.setter
     def weights(self, weights: np.ndarray):
         self._weights = weights

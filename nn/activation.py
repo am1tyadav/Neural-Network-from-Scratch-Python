@@ -6,8 +6,7 @@ from nn.common import Differentiable
 class Activation(Differentiable):
 
     @abstractmethod
-    def __call__(self, input_tensor: np.ndarray) -> np.ndarray:
-        ...
+    def __call__(self, input_tensor: np.ndarray) -> np.ndarray: ...
 
 
 class ReLU(Activation):

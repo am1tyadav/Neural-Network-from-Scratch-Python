@@ -15,37 +15,29 @@ class Model(ABC):
 
     @property
     @abstractmethod
-    def learning_rate(self):
-        ...
+    def learning_rate(self): ...
 
     @learning_rate.setter
     @abstractmethod
-    def learning_rate(self, value: float):
-        ...
+    def learning_rate(self, value: float): ...
 
     @abstractmethod
-    def __call__(self, input_tensor: np.ndarray) -> np.ndarray:
-        ...
+    def __call__(self, input_tensor: np.ndarray) -> np.ndarray: ...
 
     @abstractmethod
-    def fit(self, examples: np.ndarray, labels: np.ndarray, epochs: int):
-        ...
+    def fit(self, examples: np.ndarray, labels: np.ndarray, epochs: int): ...
 
     @abstractmethod
-    def predict(self, examples: np.ndarray) -> np.ndarray:
-        ...
+    def predict(self, examples: np.ndarray) -> np.ndarray: ...
 
     @abstractmethod
-    def evaluate(self, examples: np.ndarray, labels: np.ndarray) -> np.ndarray:
-        ...
+    def evaluate(self, examples: np.ndarray, labels: np.ndarray) -> np.ndarray: ...
 
     @abstractmethod
-    def backward_step(self, labels: np.ndarray):
-        ...
+    def backward_step(self, labels: np.ndarray): ...
 
     @abstractmethod
-    def update(self):
-        ...
+    def update(self): ...
 
 
 class NeuralNetwork(Model):
@@ -86,7 +78,6 @@ class NeuralNetwork(Model):
     def learning_rate(self, value: float):
         self._learning_rate = value
 
-
     def backward_step(self, labels: np.ndarray):
         da = self._loss.gradient(self._output, labels)
 
@@ -109,11 +100,10 @@ class NeuralNetwork(Model):
             )
             layer.grad_bias = np.mean(dz, axis=1, keepdims=True)
             da = np.dot(np.transpose(layer.weights), dz)
-            
+
             self._optimizer.layer_number = index
             self._optimizer.update_weights(layer, layer.grad_weights)
             self._optimizer.update_bias(layer, layer.grad_bias)
-
 
     def fit(
         self,

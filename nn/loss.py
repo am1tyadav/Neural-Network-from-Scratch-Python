@@ -11,24 +11,22 @@ class Loss(Differentiable):
     """
 
     @abstractmethod
-    def __call__(self, predictions: np.ndarray, labels: np.ndarray) -> np.ndarray:
-        ...
+    def __call__(self, predictions: np.ndarray, labels: np.ndarray) -> np.ndarray: ...
 
 
 class BinaryCrossEntropy(Loss):
     def __call__(self, predictions: np.ndarray, labels: np.ndarray) -> np.ndarray:
         epsilon = 1e-7  # Small epsilon value to avoid division by zero
-        loss = (
-            np.multiply(labels, np.log(predictions + epsilon))
-            + np.multiply(1 - labels, np.log(1 - predictions + epsilon))
+        loss = np.multiply(labels, np.log(predictions + epsilon)) + np.multiply(
+            1 - labels, np.log(1 - predictions + epsilon)
         )
         return -1 * np.mean(loss)
 
     def gradient(self, predictions: np.ndarray, labels: np.ndarray) -> np.ndarray:
         epsilon = 1e-7  # Small epsilon value to avoid division by zero
         return -1 * (
-            np.divide(labels, predictions + epsilon) -
-            np.divide(1 - labels, 1 - predictions + epsilon)
+            np.divide(labels, predictions + epsilon)
+            - np.divide(1 - labels, 1 - predictions + epsilon)
         )
 
 

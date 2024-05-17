@@ -4,8 +4,7 @@ from abc import ABC, abstractmethod
 
 class Callback(ABC):
     @abstractmethod
-    def on_epoch_end(self, epoch: int, loss: float):
-        ...
+    def on_epoch_end(self, epoch: int, loss: float): ...
 
 
 class CSVLogger(Callback):

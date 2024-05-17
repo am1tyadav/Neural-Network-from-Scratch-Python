@@ -129,7 +129,7 @@ async def _download_dataset(data_dir):
         "train-images-idx3-ubyte.gz",
         "train-labels-idx1-ubyte.gz",
         "t10k-images-idx3-ubyte.gz",
-        "t10k-labels-idx1-ubyte.gz"
+        "t10k-labels-idx1-ubyte.gz",
     )
     urls = [os.path.join(base_url, file) for file in files]
 

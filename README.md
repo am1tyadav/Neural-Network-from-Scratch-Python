@@ -175,6 +175,10 @@ Similarly run the boston.py using
 python boston.py
 ```
 
+## Development
+
+Currently tested with `python=3.10`. Tests for the `nn` module are available in `./tests` and can be run with `python -m unittest ./tests -v`. Linted with `black .`.
+
 ## Next Steps
 
 2. Learning rate scheduler callback
