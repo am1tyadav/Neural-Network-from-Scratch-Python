@@ -11,7 +11,7 @@ python -m venv venv
 source venv/bin/activate
 # Install requirements
 pip install -r requirements.txt
-# Run the example
+# Run the example(s)
 python mnist.py
 python boston.py
 ```
@@ -136,10 +136,6 @@ class NeuralNetwork(Model):
                 (self._regularization_factor / self._num_examples) * layer.weights
             layer.grad_bias = np.mean(dz, axis=1, keepdims=True)
             da = np.dot(np.transpose(layer.grad_weights), dz)
-
-            self._optimizer.layer_number = index
-            self._optimizer.update_weights(layer, layer.grad_weights)
-            self._optimizer.update_bias(layer, layer.grad_bias)
     ...
 ```
 
@@ -151,36 +147,53 @@ The computed gradients for each layer are stored in the layer instance itself - 
 When the loop reaches the first layer, there is no previous output to it. Therefore, we set
 `prev_layer_output` to `self._input` - i.e. the input to the model, the examples
 
-`self._optimizer.layer_number = index`: This line sets the `layer_number` attribute of the optimizer to the current index. The `layer_number` attribute is used by the optimizer to keep track of the current layer being updated during the backward step.
-
-`self._optimizer.update_weights(layer, layer.grad_weights)`: This line calls the `update_weights` method of the optimizer and passes the current layer and its corresponding gradient of weights (`layer.grad_weights`) as arguments. The optimizer uses this information to update the weights of the layer based on its specific optimization algorithm (e.g., Adam, RMSprop).
-
-`self._optimizer.update_bias(layer, layer.grad_bias)`: This line calls the `update_bias` method of the optimizer and passes the current layer and its corresponding gradient of biases (`layer.grad_bias`) as arguments. The optimizer uses this information to update the biases of the layer based on its specific optimization algorithm.
-
 ### 4. Update the Parameters
 
-Finally, the learnable parameters (weights and biases) are updated based on its specific optimization algorithm (e.g., Adam, RMSprop):
+Finally, the learnable parameters (weights and biases) are updated based on its specific optimization algorithm (e.g., Adam, RMSprop).
 
 ```python
 class NeuralNetwork(Model):
     ...
     for ln in range(0, len(self._layers)):
-            self._optimizer.layer_number = ln
+            self._optimizer.ln = ln
             self._layers[ln][0].update(self._optimizer)
     ...
 ```
 
-Similarly run the boston.py using
+`self._optimizer.ln = ln`: This line sets the `_layer_number` attribute of the optimizer to the current index. The `_layer_number` attribute is used by the optimizer to keep track of the current layer being updated during the backward step.
+
+`self._layers[ln][0].update(self._optimizer)`: This line calls the `update` method on the layer which, in turns, calls `update_weights` and `update_bias` methods of the optimizer and passes the current layer and its corresponding gradient of weights as arguments. The optimizer uses this information to update the weights of the layer based on its specific optimization algorithm (e.g., Adam, RMSprop).
+
+## Examples
+
+### MNIST
+
+A couple of examples are provided in the root directory. To run the MNIST example:
+
+```bash
+python mnist.py
+```
+
+The MNIST example uses only the zeros and ones from the MNIST dataset to train a binary classifier.
+
+### Boston Housing Dataset
+
+The Boston Housing Dataset is a dataset for regression tasks. Run the example with:
+
 ```bash
 python boston.py
 ```
 
 ## Development
 
-Currently tested with `python=3.10`. Tests for the `nn` module are available in `./tests` and can be run with `python -m unittest ./tests -v`. Linted with `black .`.
+Currently tested with `python>=3.11`
+
+Tests for the `nn` module are available in `./tests` and can be run with `python -m unittest discover ./tests -v`
+
+Linted with `black .`.
 
 ## Next Steps
 
-2. Learning rate scheduler callback
-3. Way to implement non trainable layers like Dropout
-4. Way to save and load model parameters
+- Learning rate scheduler callback
+- Way to implement non trainable layers like Dropout
+- Way to save and load model parameters

@@ -1,20 +1,16 @@
 import asyncio
 import os
-import shutil
-from typing import Awaitable, Tuple
 
 import numpy as np
+from numpy.typing import NDArray
 import requests
 from loguru import logger
 
-import numpy as np
-from loguru import logger
-
-from nn.activation import ReLU, Linear, Sigmoid
+from nn.activation import ReLU, Linear
 from nn.layer import Dense
-from nn.loss import MeanSquaredError, BinaryCrossEntropy, MeanAbsoluteError
+from nn.loss import MeanAbsoluteError
 from nn.model import NeuralNetwork
-from nn.optimizer import Adam, SGD, RMSprop
+from nn.optimizer import RMSprop
 
 
 def _download_url(url: str, data_dir: str) -> str:
@@ -39,11 +35,7 @@ def _download_url(url: str, data_dir: str) -> str:
     return None
 
 
-async def _download_url_async(url: str, data_dir: str) -> Awaitable:
-    return await asyncio.to_thread(_download_url, url, data_dir)
-
-
-def _read_file(file_path: str) -> np.ndarray:
+def _read_file(file_path: str) -> NDArray:
     """Read a file and return its content as a numpy array"""
 
     logger.info(f"Reading file at path {file_path}")
@@ -56,7 +48,7 @@ def _read_file(file_path: str) -> np.ndarray:
     )
 
 
-def _decode_data(data_path: str) -> np.ndarray:
+def _decode_data(data_path: str) -> NDArray:
     """Read data and return decoded numpy array"""
 
     logger.info(f"Decoding data at {data_path}")
@@ -64,43 +56,17 @@ def _decode_data(data_path: str) -> np.ndarray:
     return _read_file(data_path)
 
 
-def _standardize_data(x: np.ndarray) -> np.ndarray:
-    """Standardize data by subtracting mean and dividing by standard deviation"""
-
-    logger.info("Standardizing data")
-
-    x_mean = np.mean(x, axis=0)
-    x_std = np.std(x, axis=0)
-
-    return (x - x_mean) / x_std
-
-
-def _orignal_data(x: np.ndarray) -> np.ndarray:
+def _orignal_data(x: NDArray) -> NDArray:
     """Return the orignal data as it is"""
     return x
 
 
-def _normalize_data(x: np.ndarray) -> np.ndarray:
+def _normalize_data(x: NDArray) -> NDArray:
     """Normalize data by dividing by max value"""
 
     logger.info("Normalizing data")
 
     return x / np.max(x, axis=0)
-
-
-def _decode_and_preprocess_data(data_path: str) -> Tuple[np.ndarray]:
-    """Read data and labels, and return decoded numpy arrays"""
-
-    logger.info(f"Decoding data at {data_path}")
-
-    data = _read_file(data_path)
-    labels = data[:, -1]
-    data = data[:, :-1]
-
-    x = _standardize_data(data)
-    y = labels
-
-    return x, y
 
 
 def train_test_split(x, y, test_size=0.3, random_state=None):
@@ -160,7 +126,7 @@ def boston_load(preprocess_fn=_orignal_data, test_size=0.3):
     )  # Split the data into training and testing sets with a 30/70 split ratio.
 
 
-def r2_score(preds: np.ndarray, y_test: np.ndarray) -> float:
+def r2_score(preds: NDArray, y_test: NDArray) -> float:
     mean_y = np.mean(y_test)
     ss_total = np.sum((y_test - mean_y) ** 2)
     ss_residual = np.sum((y_test - preds) ** 2)
@@ -183,13 +149,13 @@ def main():
             (Dense(1), Linear()),
         ),
         loss=MeanAbsoluteError(),
-        optimizer=RMSprop(learning_rate=0.01),
+        optimizer=RMSprop(learning_rate=0.0003),
         regularization_factor=0.001,
     )
 
     logger.info("Training model")
 
-    model.fit(x_train, y_train, epochs=100, verbose=True)
+    model.fit(x_train, y_train, epochs=24000, verbose=True, log_interval=2000)
 
     logger.info("Evaluating trained model")
 

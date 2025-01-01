@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Tuple
 
 import numpy as np
+from numpy.typing import NDArray
 
 from nn.activation import Activation
 from nn.callback import Callback
@@ -22,19 +23,27 @@ class Model(ABC):
     def learning_rate(self, value: float): ...
 
     @abstractmethod
-    def __call__(self, input_tensor: np.ndarray) -> np.ndarray: ...
+    def __call__(self, input_tensor: NDArray) -> NDArray: ...
 
     @abstractmethod
-    def fit(self, examples: np.ndarray, labels: np.ndarray, epochs: int): ...
+    def fit(
+        self,
+        examples: NDArray,
+        labels: NDArray,
+        epochs: int,
+        verbose: bool = False,
+        callbacks: Tuple[Callback] = (),
+        log_interval: int = 1,
+    ): ...
 
     @abstractmethod
-    def predict(self, examples: np.ndarray) -> np.ndarray: ...
+    def predict(self, examples: NDArray) -> NDArray: ...
 
     @abstractmethod
-    def evaluate(self, examples: np.ndarray, labels: np.ndarray) -> np.ndarray: ...
+    def evaluate(self, examples: NDArray, labels: NDArray) -> NDArray: ...
 
     @abstractmethod
-    def backward_step(self, labels: np.ndarray): ...
+    def backward_step(self, labels: NDArray): ...
 
     @abstractmethod
     def update(self): ...
@@ -57,7 +66,7 @@ class NeuralNetwork(Model):
         self._output = None
         self._num_examples = None
 
-    def __call__(self, input_tensor: np.ndarray) -> np.ndarray:
+    def __call__(self, input_tensor: NDArray) -> NDArray:
         if self._num_examples is None:
             self._num_examples = input_tensor.shape[-1]
 
@@ -78,7 +87,7 @@ class NeuralNetwork(Model):
     def learning_rate(self, value: float):
         self._learning_rate = value
 
-    def backward_step(self, labels: np.ndarray):
+    def backward_step(self, labels: NDArray):
         da = self._loss.gradient(self._output, labels)
 
         for index in reversed(range(0, self._num_layers)):
@@ -101,17 +110,14 @@ class NeuralNetwork(Model):
             layer.grad_bias = np.mean(dz, axis=1, keepdims=True)
             da = np.dot(np.transpose(layer.weights), dz)
 
-            self._optimizer.layer_number = index
-            self._optimizer.update_weights(layer, layer.grad_weights)
-            self._optimizer.update_bias(layer, layer.grad_bias)
-
     def fit(
         self,
-        examples: np.ndarray,
-        labels: np.ndarray,
+        examples: NDArray,
+        labels: NDArray,
         epochs: int,
         verbose: bool = False,
         callbacks: Tuple[Callback] = (),
+        log_interval: int = 1,
     ):
         for epoch in range(1, epochs + 1):
             self._input = examples
@@ -124,18 +130,18 @@ class NeuralNetwork(Model):
                 loss_scalar = float(np.squeeze(loss))
                 callback.on_epoch_end(epoch, loss_scalar)
 
-            if verbose:
-                print(f"Epoch: {epoch:03d}, Loss {loss:0.4f}")
+            if verbose and epoch % log_interval == 0:
+                print(f"Epoch: {epoch:05d} / {epochs}, Loss {loss:0.5f}")
 
-    def predict(self, examples: np.ndarray) -> np.ndarray:
+    def predict(self, examples: NDArray) -> NDArray:
         outputs = self(examples)
         return outputs
 
-    def evaluate(self, examples: np.ndarray, labels: np.ndarray) -> np.ndarray:
+    def evaluate(self, examples: NDArray, labels: NDArray) -> NDArray:
         _ = self(examples)
         return self._loss(self._output, labels)
 
     def update(self):
         for ln in range(0, len(self._layers)):
-            self._optimizer.layer_number = ln
+            self._optimizer._layer_number = ln
             self._layers[ln][0].update(self._optimizer)

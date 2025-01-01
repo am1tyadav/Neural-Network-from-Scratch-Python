@@ -1,6 +1,6 @@
-notebook==6.4.12
-numpy==1.23.0
-loguru==0.6.0
+numpy
+loguru
 requests>2.31.0
 tqdm>=4.66.3
 black
+setuptools
